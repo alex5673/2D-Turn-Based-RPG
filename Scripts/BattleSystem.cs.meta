@@ -1,0 +1,48 @@
+fileFormatVersion: 2
+guid: 380ca6cf7fa3e16458bf205cdca6ca44
+timeCreated: 1518869223
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - chara1HpText: {instanceID: 0}
+  - chara1MpText: {instanceID: 0}
+  - chara2HpText: {instanceID: 0}
+  - chara2MpText: {instanceID: 0}
+  - chara3HpText: {instanceID: 0}
+  - chara3MpText: {instanceID: 0}
+  - spellMenu: {instanceID: 0}
+  - inventoryMenu: {instanceID: 0}
+  - enemy1Button: {instanceID: 0}
+  - enemy2Button: {instanceID: 0}
+  - enemy3Button: {instanceID: 0}
+  - warriorButton: {instanceID: 0}
+  - ninjaButton: {instanceID: 0}
+  - mageButton: {instanceID: 0}
+  - indicator: {fileID: 1575171501811886, guid: 2c432d2b71739864d90b19988ae5553a,
+      type: 2}
+  - indicator2: {fileID: 1575171501811886, guid: 2c432d2b71739864d90b19988ae5553a,
+      type: 2}
+  - deathIcon: {fileID: 1475718761974622, guid: 5935022405392364ab94bfa1decb0f0e,
+      type: 2}
+  - greenGoblin: {fileID: 1481089998183018, guid: c05e28d3f6fe0254f973a012187501ec,
+      type: 2}
+  - rat: {fileID: 1030060279964166, guid: 2fd51edac916e9f4ab2e9d8649d15e91, type: 2}
+  - thunderGhost: {fileID: 1560965724859078, guid: f6570c42c9c178743bacbf105f01c5bc,
+      type: 2}
+  - bossEnemy: {fileID: 1095480360790516, guid: 3e05c353e595d1742bf0a8355f8728ce,
+      type: 2}
+  - cureSpell: {fileID: 1018070177249916, guid: 087bff966b567ef4d9f94261234e3123,
+      type: 2}
+  - windSpell: {fileID: 1648085469549990, guid: ce6b07105f786134eac1db97dd8a8f7d,
+      type: 2}
+  - iceSpell: {fileID: 1628990673464486, guid: b949be5a04a3e17439ca1be7c9892764, type: 2}
+  - thunderSpell: {fileID: 1246762711707574, guid: ed6d63b3b96a05d49bd754c098b1dc9d,
+      type: 2}
+  - swordSlash: {fileID: 1221704804123884, guid: 9ec063f5edd9a674787e468a8d255cdb,
+      type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
