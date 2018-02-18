@@ -1,5 +1,5 @@
 # 2D-Turn-Based-RPG
-2D turn-based RPG with a retro sprite based design
+2D turn-based RPG with a retro sprite based design made with Unity in C#
 
 *Game work in progress*
 
