@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+//using UnityEditor;
+using System.IO;
 
 public class BattleSystem : MonoBehaviour {
 
@@ -147,6 +149,12 @@ public class BattleSystem : MonoBehaviour {
     private string[] previousAttacks;
     private int prevAttacksIndex;
 
+    private string bossEncountered;
+
+    public GameObject normalBattleMusic;
+    public GameObject bossBattleMusic;
+
+
     // Use this for initialization
 	void Start () {
         mainCharacter1 = new Warrior();
@@ -270,7 +278,7 @@ public class BattleSystem : MonoBehaviour {
         animationTimer = 0.0f;
         animationOccuring = false;
 
-        boss = true;
+        boss = false;
         bossSelect = false;
         bossEnemy1 = new BossEnemy();
         bossPosition = new Vector3(-7.3f, -0.57f, 0.0f);
@@ -280,6 +288,19 @@ public class BattleSystem : MonoBehaviour {
         attackSelected = "";
         previousAttacks = new string[5];
         prevAttacksIndex = 0;
+
+        bossEncountered = "";
+
+        normalBattleMusic.SetActive(false);
+        bossBattleMusic.SetActive(false);
+
+        ReadStatsFile();
+
+        ReadBossEnemyFile();
+        if(bossEncountered == "true")
+        {
+            boss = true;
+        }
     }
 	
 	// Update is called once per frame
@@ -291,6 +312,8 @@ public class BattleSystem : MonoBehaviour {
 
             if(boss == true)
             {
+                bossBattleMusic.SetActive(true);
+
                 amountOfEnemies = 1;
 
                 if(greenGoblinClone != null)
@@ -312,7 +335,9 @@ public class BattleSystem : MonoBehaviour {
             }
             else
             {
-                if(bossClone != null)
+                normalBattleMusic.SetActive(true);
+
+                if (bossClone != null)
                 {
                     Destroy(bossClone);
                 }
@@ -366,11 +391,6 @@ public class BattleSystem : MonoBehaviour {
                                         bool hasTurn = false;
                                         for (int k = 0; k < currentAmountOfCharacters; k++)
                                         {
-                                            //Debug.Log("k = " + k);
-                                            if (turnBasedSystem[k] != null)
-                                            {
-                                                //Debug.Log("Turn based system character = " + turnBasedSystem[k].GetType());
-                                            }
                                             //Debug.Log("Current character = " + characters[j].GetType());
                                             //Debug.Log(turnBasedSystem[k]);
                                             if ((turnBasedSystem[k] != null) && (turnBasedSystem[k].GetType().Equals(characters[j].GetType())))
@@ -394,6 +414,7 @@ public class BattleSystem : MonoBehaviour {
                             turnBasedSystem[turns] = turnCharacter;
                             turns++;
                         }
+                        Debug.Log("Turn list = " + turnBasedSystem[0] + " " + turnBasedSystem[1] + " " + turnBasedSystem[2] + " " + turnBasedSystem[3] + " " + turnBasedSystem[4] + " " + turnBasedSystem[5]);
 
                         while (turns < 6)
                         {
@@ -430,12 +451,19 @@ public class BattleSystem : MonoBehaviour {
                                 turnBasedSystem[turns] = turnCharacter;
                                 turns++;
                             }
+                            //Debug.Log("Turn list = " + turnBasedSystem[0] + " " + turnBasedSystem[1] + " " + turnBasedSystem[2] + " " + turnBasedSystem[3] + " " + turnBasedSystem[4] + " " + turnBasedSystem[5]);
                         }
                     }
                     newRoundOfTurns = false;
                     turnCharacterIndex = 0;
                 }
                 // Finished doing turns
+
+                while(turnBasedSystem[turnCharacterIndex].GetCurrentHp() <= 0)
+                {
+                    turnCharacterIndex++;
+                }
+
                 //Debug.Log("Turn list = " + turnBasedSystem[0] + " " + turnBasedSystem[1] + " " + turnBasedSystem[2] + " " + turnBasedSystem[3] + " " + turnBasedSystem[4] + " " + turnBasedSystem[5]);
                 currentTurnCharacter = turnBasedSystem[turnCharacterIndex];
                 // Debug.Log("currentTurnCharacter = " + currentTurnCharacter);
@@ -628,10 +656,23 @@ public class BattleSystem : MonoBehaviour {
             mainCharacter2.SetCurrentHp(mainCharacter2.GetMaxHp());
             mainCharacter3.SetCurrentHp(mainCharacter3.GetMaxHp());
             mainCharacter3.SetCurrentMp(mainCharacter3.GetMaxMp());
+
+            WriteToStatsFile();
+
+            if(boss == true)
+            {
+                WriteToBossFile(true);
+            }
+
             SceneManager.LoadScene("WorldMap");
         }
         else if(GameOver() == true)
         {
+            if(boss == true)
+            {
+                WriteToBossFile(false);
+            }
+
             SceneManager.LoadScene("GameOver");
         }
     }
@@ -961,16 +1002,19 @@ public class BattleSystem : MonoBehaviour {
         }
         else if(spellSelect == true)
         {
-            if (enemy1Select == true)
+            if (currentTurnCharacter.GetCurrentMp() >= 30)
             {
-                MagicAttack();
-            }
-            else if (enemy1.GetCurrentHp() > 0)
-            {
-                attackTarget = enemy1;
-                enemy1Select = true;
-                enemy2Select = false;
-                enemy3Select = false;
+                if (enemy1Select == true)
+                {
+                    MagicAttack();
+                }
+                else if (enemy1.GetCurrentHp() > 0)
+                {
+                    attackTarget = enemy1;
+                    enemy1Select = true;
+                    enemy2Select = false;
+                    enemy3Select = false;
+                }
             }
         }
     }
@@ -993,16 +1037,19 @@ public class BattleSystem : MonoBehaviour {
         }
         else if (spellSelect == true)
         {
-            if (enemy2Select == true)
+            if (currentTurnCharacter.GetCurrentMp() >= 30)
             {
-                MagicAttack();
-            }
-            else if (enemy2.GetCurrentHp() > 0)
-            {
-                attackTarget = enemy2;
-                enemy2Select = true;
-                enemy1Select = false;
-                enemy3Select = false;
+                if (enemy2Select == true)
+                {
+                    MagicAttack();
+                }
+                else if (enemy2.GetCurrentHp() > 0)
+                {
+                    attackTarget = enemy2;
+                    enemy2Select = true;
+                    enemy1Select = false;
+                    enemy3Select = false;
+                }
             }
         }
     }
@@ -1025,16 +1072,19 @@ public class BattleSystem : MonoBehaviour {
         }
         else if (spellSelect == true)
         {
-            if (enemy3Select == true)
+            if (currentTurnCharacter.GetCurrentMp() >= 30)
             {
-                MagicAttack();
-            }
-            else if (enemy3.GetCurrentHp() > 0)
-            {
-                attackTarget = enemy3;
-                enemy3Select = true;
-                enemy1Select = false;
-                enemy3Select = false;
+                if (enemy3Select == true)
+                {
+                    MagicAttack();
+                }
+                else if (enemy3.GetCurrentHp() > 0)
+                {
+                    attackTarget = enemy3;
+                    enemy3Select = true;
+                    enemy1Select = false;
+                    enemy3Select = false;
+                }
             }
         }
     }
@@ -1116,6 +1166,13 @@ public class BattleSystem : MonoBehaviour {
                     MpPotion();
                 }
             }
+            else if (mainCharacter1.GetCurrentHp() > 0)
+            {
+                healTarget = mainCharacter1;
+                character1Select = true;
+                character2Select = false;
+                character3Select = false;
+            }
         }
     }
 
@@ -1167,6 +1224,13 @@ public class BattleSystem : MonoBehaviour {
                     //mpPotion effects
                     MpPotion();
                 }
+            }
+            else if (mainCharacter2.GetCurrentHp() > 0)
+            {
+                healTarget = mainCharacter2;
+                character2Charge = true;
+                character1Select = false;
+                character3Select = false;
             }
         }
     }
@@ -1222,7 +1286,7 @@ public class BattleSystem : MonoBehaviour {
             }
             else if (mainCharacter3.GetCurrentHp() > 0)
             {
-                healTarget = enemy3;
+                healTarget = mainCharacter3;
                 character3Select = true;
                 character1Select = false;
                 character2Select = false;
@@ -1454,16 +1518,19 @@ public class BattleSystem : MonoBehaviour {
 
     public void HealSelect()
     {
-        healSelect = true;
-        spellSelect = false;
+        if (currentTurnCharacter.GetCurrentMp() >= 30)
+        {
+            healSelect = true;
+            spellSelect = false;
 
-        enemy1Button.SetActive(false);
-        enemy2Button.SetActive(false);
-        enemy3Button.SetActive(false);
+            enemy1Button.SetActive(false);
+            enemy2Button.SetActive(false);
+            enemy3Button.SetActive(false);
 
-        warriorButton.SetActive(true);
-        ninjaButton.SetActive(true);
-        mageButton.SetActive(true);
+            warriorButton.SetActive(true);
+            ninjaButton.SetActive(true);
+            mageButton.SetActive(true);
+        }
     }
 
     public void InventorySelect()
@@ -1500,26 +1567,35 @@ public class BattleSystem : MonoBehaviour {
 
     public void WindAttackSelect()
     {
-        windAttack = true;
-        iceAttack = false;
-        thunderAttack = false;
-        spellMenu.SetActive(false);
+        if (currentTurnCharacter.GetCurrentMp() >= 30)
+        {
+            windAttack = true;
+            iceAttack = false;
+            thunderAttack = false;
+            spellMenu.SetActive(false);
+        }
     }
 
     public void IceAttackSelect()
     {
-        iceAttack = true;
-        windAttack = false;
-        thunderAttack = false;
-        spellMenu.SetActive(false);
+        if (currentTurnCharacter.GetCurrentMp() >= 30)
+        {
+            iceAttack = true;
+            windAttack = false;
+            thunderAttack = false;
+            spellMenu.SetActive(false);
+        }
     }
 
     public void ThunderAttackSelect()
     {
-        thunderAttack = true;
-        windAttack = false;
-        thunderAttack = false;
-        spellMenu.SetActive(false);
+        if (currentTurnCharacter.GetCurrentMp() >= 30)
+        {
+            thunderAttack = true;
+            windAttack = false;
+            thunderAttack = false;
+            spellMenu.SetActive(false);
+        }
     }
 
     public void SetBossEnemy()
@@ -1647,15 +1723,15 @@ public class BattleSystem : MonoBehaviour {
         for (bool attackOk = false; attackOk == false;)
         {
             randomNumber = Random.Range(0.0f, 10.0f);
-            if (randomNumber <= 2.50)
+            if (randomNumber <= 4.00)
             {
                 attackSelected = gAAttacks[0];
             }
-            else if (randomNumber <= 5.00)
+            else if (randomNumber <= 7.00)
             {
                 attackSelected = gAAttacks[1];
             }
-            else if (randomNumber <= 7.50)
+            else if (randomNumber <= 9.00)
             {
                 attackSelected = gAAttacks[2];
             }
@@ -1709,5 +1785,211 @@ public class BattleSystem : MonoBehaviour {
             ThunderAttackSelect();
             MagicAttack();
         }
+    }
+
+    public void ReadStatsFile()
+    {
+        string fileName = "Character1Stats.txt";
+        string fileName2 = "Character2Stats.txt";
+        string fileName3 = "Character3Stats.txt";
+
+        StreamReader reader = new StreamReader(fileName);
+        StreamReader reader2 = new StreamReader(fileName2);
+        StreamReader reader3 = new StreamReader(fileName3);
+
+        try
+        {
+            mainCharacter1.SetLevel(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetLevel(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetLevel(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetExperiencePoints(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetExperiencePoints(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetExperiencePoints(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetExperienceNeeded(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetExperienceNeeded(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetExperienceNeeded(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetMaxHp(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetMaxHp(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetMaxHp(int.Parse(reader3.ReadLine()));
+
+            mainCharacter3.SetMaxMp(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetAttack(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetAttack(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetAttack(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetDefense(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetDefense(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetDefense(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetMagicAttack(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetMagicAttack(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetMagicAttack(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetMagicDefense(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetMagicDefense(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetMagicDefense(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetWindResistance(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetWindResistance(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetWindResistance(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetThunderResistance(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetThunderResistance(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetThunderResistance(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetAccuracy(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetAccuracy(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetAccuracy(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetSpeed(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetSpeed(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetSpeed(int.Parse(reader3.ReadLine()));
+
+            mainCharacter1.SetEvade(int.Parse(reader.ReadLine()));
+            mainCharacter2.SetEvade(int.Parse(reader2.ReadLine()));
+            mainCharacter3.SetEvade(int.Parse(reader3.ReadLine()));
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log("" + e.Message);
+        }
+        finally
+        {
+            reader.Close();
+            reader2.Close();
+            reader3.Close();
+        }
+    }
+
+    public void WriteToStatsFile()
+    {
+        string fileName = "Character1Stats.txt";
+        string fileName2 = "Character2Stats.txt";
+        string fileName3 = "Character3Stats.txt";
+
+        StreamWriter writer = new StreamWriter(Application.persistentDataPath + "/" + fileName, false);
+        StreamWriter writer2 = new StreamWriter(Application.persistentDataPath + "/" + fileName2, false);
+        StreamWriter writer3 = new StreamWriter(Application.persistentDataPath + "/" + fileName3, false);
+
+        try
+        {
+            writer.WriteLine("" + mainCharacter1.GetLevel());
+            writer2.WriteLine("" + mainCharacter2.GetLevel());
+            writer3.WriteLine("" + mainCharacter3.GetLevel());
+
+            writer.WriteLine("" + mainCharacter1.GetExperiencePoints());
+            writer2.WriteLine("" + mainCharacter2.GetExperiencePoints());
+            writer3.WriteLine("" + mainCharacter3.GetExperiencePoints());
+
+            writer.WriteLine("" + mainCharacter1.GetExperienceNeeded());
+            writer2.WriteLine("" + mainCharacter2.GetExperienceNeeded());
+            writer2.WriteLine("" + mainCharacter3.GetExperienceNeeded());
+
+            writer.WriteLine("" + mainCharacter1.GetMaxHp());
+            writer2.WriteLine("" + mainCharacter2.GetMaxHp());
+            writer3.WriteLine("" + mainCharacter3.GetMaxHp());
+
+            writer3.WriteLine("" + mainCharacter3.GetMaxMp());
+
+            writer.WriteLine("" + mainCharacter1.GetAttack());
+            writer2.WriteLine("" + mainCharacter2.GetAttack());
+            writer3.WriteLine("" + mainCharacter3.GetAttack());
+
+            writer.WriteLine("" + mainCharacter1.GetDefense());
+            writer2.WriteLine("" + mainCharacter2.GetDefense());
+            writer3.WriteLine("" + mainCharacter3.GetDefense());
+
+            writer.WriteLine("" + mainCharacter1.GetMagicAttack());
+            writer2.WriteLine("" + mainCharacter2.GetMagicAttack());
+            writer3.WriteLine("" + mainCharacter3.GetMagicAttack());
+
+            writer.WriteLine("" + mainCharacter1.GetMagicDefense());
+            writer2.WriteLine("" + mainCharacter2.GetMagicDefense());
+            writer3.WriteLine("" + mainCharacter3.GetMagicDefense());
+
+            writer.WriteLine("" + mainCharacter1.GetWindResistance());
+            writer2.WriteLine("" + mainCharacter2.GetWindResistance());
+            writer3.WriteLine("" + mainCharacter3.GetWindResistance());
+
+            writer.WriteLine("" + mainCharacter1.GetIceResistance());
+            writer2.WriteLine("" + mainCharacter2.GetIceResistance());
+            writer3.WriteLine("" + mainCharacter3.GetIceResistance());
+
+            writer.WriteLine("" + mainCharacter1.GetThunderResistance());
+            writer2.WriteLine("" + mainCharacter2.GetThunderResistance());
+            writer3.WriteLine("" + mainCharacter3.GetThunderResistance());
+
+            writer.WriteLine("" + mainCharacter1.GetAccuracy());
+            writer2.WriteLine("" + mainCharacter2.GetAccuracy());
+            writer3.WriteLine("" + mainCharacter3.GetAccuracy());
+
+            writer.WriteLine("" + mainCharacter1.GetSpeed());
+            writer2.WriteLine("" + mainCharacter2.GetSpeed());
+            writer3.WriteLine("" + mainCharacter3.GetSpeed());
+
+            writer.WriteLine("" + mainCharacter1.GetEvade());
+            writer2.WriteLine("" + mainCharacter2.GetEvade());
+            writer3.WriteLine("" + mainCharacter3.GetEvade());
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log("" + e.Message);
+        }
+        finally
+        {
+            writer.Close();
+            writer2.Close();
+            writer3.Close();
+        }
+
+        //AssetDatabase.Refresh();
+    }
+
+    public void ReadBossEnemyFile()
+    {
+        string fileName = "BossEnemy.txt";
+
+        StreamReader reader = new StreamReader(Application.persistentDataPath + "/" + fileName);
+
+        try
+        {
+            reader.ReadLine();
+            bossEncountered = reader.ReadLine();
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log("" + e.Message);
+        }
+        finally
+        {
+            reader.Close();
+        }
+    }
+
+    public void WriteToBossFile(bool victory)
+    {
+        string fileName = "BossEnemy.txt";
+
+        StreamWriter writer = new StreamWriter(Application.persistentDataPath + "/" + fileName, false);
+
+        try
+        {
+            writer.WriteLine("" + victory);
+            writer.WriteLine("false");
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log("" + e.Message);
+        }
+        finally
+        {
+            writer.Close();
+        }
+
+        //AssetDatabase.Refresh();
     }
 }

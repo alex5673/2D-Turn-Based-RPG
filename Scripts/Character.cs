@@ -193,6 +193,21 @@ public class Character {
         }
     }
 
+    public void SetWindResistance(int windRes)
+    {
+        windResistance = windRes;
+    }
+
+    public void SetIceResistance(int iceRes)
+    {
+        iceResistance = iceRes;
+    }
+
+    public void SetThunderResistance(int thunRes)
+    {
+        thunderResistance = thunRes;
+    }
+
     public void SetAccuracy(int acc)
     {
         accuracy = acc;
